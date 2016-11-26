@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="572.0" prefWidth="846.0" xmlns="http://javafx.com/javafx/8.0.101" xmlns:fx="http://javafx.com/fxml/1" fx:controller="databaseversusjava.DatabaseVersusJavaFXMLController">
+   <children>
+      <BorderPane prefHeight="572.0" prefWidth="846.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <Pane prefHeight="67.0" prefWidth="846.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button fx:id="startButton" layoutX="296.0" layoutY="21.0" mnemonicParsing="false" onAction="#sortAction" text="START" />
+                  <Button fx:id="exitButton" layoutX="487.0" layoutY="21.0" mnemonicParsing="false" text="EXIT" />
+               </children>
+            </Pane>
+         </top>
+         <left>
+            <Pane prefHeight="312.0" prefWidth="423.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label layoutX="171.0" layoutY="14.0" text="BAZA DANYCH" />
+                  <TextArea fx:id="databaseTextArea" editable="false" layoutY="31.0" prefHeight="419.0" prefWidth="423.0" />
+                  <TextField fx:id="databaseTimeTextField" editable="false" layoutX="137.0" layoutY="466.0" />
+                  <Label layoutX="100.0" layoutY="470.0" text="Czas" />
+               </children>
+            </Pane>
+         </left>
+         <right>
+            <Pane prefHeight="200.0" prefWidth="423.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label layoutX="198.0" layoutY="14.0" text="JAVA" />
+                  <TextArea fx:id="javaTextArea" editable="false" layoutY="31.0" prefHeight="419.0" prefWidth="423.0" />
+                  <TextField fx:id="javaTimeTextField" editable="false" layoutX="137.0" layoutY="466.0" />
+                  <Label layoutX="89.0" layoutY="470.0" text="Czas" />
+               </children>
+            </Pane>
+         </right>
+      </BorderPane>
+   </children>
+</AnchorPane>
