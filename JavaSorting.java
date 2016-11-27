@@ -13,21 +13,18 @@ import javafx.scene.control.TextArea;
 
 public class JavaSorting implements Runnable{
     private DatabaseVersusJavaFXMLController controller;
-    public JavaSorting(DatabaseVersusJavaFXMLController controller){
+    private String algorithm;
+    public JavaSorting(DatabaseVersusJavaFXMLController controller, String algorithm){
         this.controller = controller;
+        this.algorithm = algorithm;
     }
     public void run(){
         try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/databaseversusjava", "olek", "haslo12345")){
             long[][] data = getDataFromDatabase(conn);
-            long before = System.currentTimeMillis();
-            Arrays.sort(data, new Comparator<long[]>(){
-                public int compare(long[] r1, long[] r2){
-                    int result = Long.compare(r1[0], r2[0]);
-                    if(result == 0) return Long.compare(r1[1], r2[1]);
-                    else return result;
-                }
-            });
-            long after = System.currentTimeMillis();
+            long time=0;
+            if(algorithm.equals("Scalanie")) time = mergeSort(data);
+            else if(algorithm.equals("Bąbelkowe (z modyfikacją)")) time = bubbleSort(data);
+            else if(algorithm.equals("Przez wybór")) time = selectionSort(data);
             TextArea javaTextArea = controller.getJavaTextArea();
             javaTextArea.setText("");
             for(int i = 0; i < data.length; i++){
@@ -35,7 +32,7 @@ public class JavaSorting implements Runnable{
                     javaTextArea.appendText(data[i][k] + " ");
                 javaTextArea.appendText("\n");
             }
-            controller.getJavaTimeTextField().setText((double)(after - before)/1000 + " s");
+            controller.getJavaTimeTextField().setText((double)time/1000 + " s");
         }catch(SQLException e){
             Logger.getLogger(JavaSorting.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -53,5 +50,58 @@ public class JavaSorting implements Runnable{
             i++;
         }
         return data;
+    }
+    private long mergeSort(long[][] data){
+        long before = System.currentTimeMillis();
+        Arrays.sort(data, new Comparator<long[]>(){ 
+            public int compare(long[] r1, long[] r2){
+                int result = Long.compare(r1[0], r2[0]);
+                if(result == 0) return Long.compare(r1[1], r2[1]);
+                else return result;
+            }
+        });
+        return System.currentTimeMillis() - before;
+    }
+    private long bubbleSort(long[][] data){
+        long before = System.currentTimeMillis();
+        boolean swap = true; 
+        for(int i = 0; i < data.length && swap; i++){
+            swap = false;
+            for(int k = 0; k < data.length - 1; k++){
+                if(data[k][0] > data[k+1][0]){
+                    long x = data[k][0], y = data[k][1];
+                    data[k][0] = data[k+1][0];
+                    data[k][0] = data[k+1][1];
+                    data[k+1][0] = x;
+                    data[k+1][1] = y;
+                    swap = true;
+                }else if(data[k][0] == data[k+1][0])
+                    if(data[k][1] > data[k+1][1]){
+                        long temp = data[k][1];
+                        data[k][1] = data[k+1][1];
+                        data[k+1][1] = temp;
+                        swap = true;
+                    }
+            }
+        }
+        return System.currentTimeMillis() - before;
+    }
+    private long selectionSort(long[][] data){
+        long before = System.currentTimeMillis();
+        int min;
+        long x, y;
+        for(int i = 0; i < data.length; i++){
+            min = i;
+            for(int k = i + 1; k < data.length; k++)
+                if(data[k][0] < data[min][0] || (data[k][0] == data[min][0] && data[k][1] < data[min][1]))
+                    min = k;
+            x = data[min][0];
+            y = data[min][1];
+            data[min][0] = data[i][0];
+            data[min][1] = data[i][1];
+            data[i][0] = x;
+            data[i][1] = y;
+        }
+        return System.currentTimeMillis() - before;
     }
 }
