@@ -25,6 +25,7 @@ public class JavaSorting implements Runnable{
             if(algorithm.equals("Scalanie")) time = mergeSort(data);
             else if(algorithm.equals("Bąbelkowe (z modyfikacją)")) time = bubbleSort(data);
             else if(algorithm.equals("Przez wybór")) time = selectionSort(data);
+            else if(algorithm.equals("Przez wstawianie")) time = insertionSort(data);
             TextArea javaTextArea = controller.getJavaTextArea();
             javaTextArea.setText("");
             for(int i = 0; i < data.length; i++){
@@ -101,6 +102,24 @@ public class JavaSorting implements Runnable{
             data[min][1] = data[i][1];
             data[i][0] = x;
             data[i][1] = y;
+        }
+        return System.currentTimeMillis() - before;
+    }
+    private long insertionSort(long[][] data){
+        long before = System.currentTimeMillis();
+        int k;
+        long[] pair = new long[2];
+        for(int i = 1; i < data.length; i++){
+            k = i;
+            pair[0] = data[i][0];
+            pair[1] = data[i][1];
+            while(k > 0 && (data[k-1][0] > pair[0] || data[k-1][0] == pair[0] && data[k-1][1] > pair[1])){
+                data[k][0] = data[k-1][0];
+                data[k][1] = data[k-1][1];
+                k--;
+            }
+            data[k][0] = pair[0];
+            data[k][1] = pair[1];
         }
         return System.currentTimeMillis() - before;
     }
