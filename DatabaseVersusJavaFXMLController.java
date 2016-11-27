@@ -1,24 +1,22 @@
 package databaseversusjava;
 
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
 public class DatabaseVersusJavaFXMLController implements Initializable {
+    private String algorithm;
     @FXML
     private Button exitButton, startButton;
     @FXML
@@ -27,26 +25,23 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
     private TextField databaseTimeTextField, javaTimeTextField;
     @FXML
     private void sortAction(ActionEvent event) {
-        Platform.runLater(new SQLSorting(this));
+        algorithm = null;
+        showAlgorithmChoiceDialog();
+        if(algorithm != null){
+            databaseTextArea.setText("Trwa sortowanie...");
+            javaTextArea.setText("Trwa sortowanie...");
+            try{
+                Thread.sleep(20);
+            }catch(InterruptedException e){
+                Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
+            }
+            Platform.runLater(new SQLSorting(this));
+            Platform.runLater(new JavaSorting(this, algorithm));
+        }
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/databaseversusjava", "olek", "haslo12345")){
-            Statement stat = conn.createStatement(); 
-            ResultSet rs = stat.executeQuery("SELECT * FROM Dane");
-            rs.last();
-            long[][] data = new long[rs.getRow()][2];
-            rs.beforeFirst();
-            int i = 0;
-            while(rs.next()){
-                data[i][0] = rs.getLong(1);
-                data[i][1] = rs.getLong(2);
-                i++;
-            }
-        }catch(SQLException e){
-            Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
-        }
         exitButton.setOnAction(event -> {
             System.exit(0);
         });
@@ -62,5 +57,16 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
     }
     public TextField getJavaTimeTextField(){
         return javaTimeTextField;
+    }
+    private void showAlgorithmChoiceDialog(){
+        ArrayList<String> algorithms = new ArrayList();
+        algorithms.add("Scalanie");
+        algorithms.add("Bąbelkowe (z modyfikacją)");
+        algorithms.add("Przez wybór");
+        ChoiceDialog<String> algorithmDialog = new ChoiceDialog("Scalanie", algorithms);
+        algorithmDialog.setTitle("Algorytmy");
+        algorithmDialog.setHeaderText("Wybierz algorytm dla sortowania przez Javę");
+        Optional<String> result = algorithmDialog.showAndWait();
+        result.ifPresent(choice -> algorithm = choice);
     }
 }
