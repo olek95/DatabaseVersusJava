@@ -25,19 +25,26 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
     private TextField databaseTimeTextField, javaTimeTextField;
     @FXML
     private void sortAction(ActionEvent event) {
-        algorithm = null;
-        showAlgorithmChoiceDialog();
-        if(algorithm != null){
-            databaseTextArea.setText("Trwa sortowanie...");
-            javaTextArea.setText("Trwa sortowanie...");
-            try{
-                Thread.sleep(20);
-            }catch(InterruptedException e){
-                Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
-            }
-            Platform.runLater(new SQLSorting(this));
-            Platform.runLater(new JavaSorting(this, algorithm));
-        }
+        //algorithm = null;
+        //showAlgorithmChoiceDialog();
+        //if(algorithm != null){
+            //databaseTextArea.setText("Trwa sortowanie...");
+            //javaTextArea.setText("Trwa sortowanie...");
+            //try{
+            //    Thread.sleep(20);
+            //}catch(InterruptedException e){
+            //    Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
+            //}
+            //Platform.runLater(new SQLSorting(this));
+            //Platform.runLater(new JavaSorting(this, algorithm));
+            //Thread t = new Thread(new SQLSorting(this));
+            //t.setDaemon(true);
+            //t.start();
+            //Platform.runLater(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty()));
+            Thread t = new Thread(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty()));
+            t.start();
+            
+       // }
     }
     
     @Override
@@ -63,6 +70,7 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
         algorithms.add("Scalanie");
         algorithms.add("Bąbelkowe (z modyfikacją)");
         algorithms.add("Przez wybór");
+        algorithms.add("Przez wstawianie");
         ChoiceDialog<String> algorithmDialog = new ChoiceDialog("Scalanie", algorithms);
         algorithmDialog.setTitle("Algorytmy");
         algorithmDialog.setHeaderText("Wybierz algorytm dla sortowania przez Javę");
