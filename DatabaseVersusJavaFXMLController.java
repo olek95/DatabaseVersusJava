@@ -1,12 +1,10 @@
 package databaseversusjava;
 
+import databaseversusjava.JavaSorting.SortTypes;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -15,8 +13,17 @@ import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+/**
+ * Klasa <code>DatabaseVersusJavaFXMLController</code> reprezentuje sterowanie 
+ * oknem programu porównującego sortowanie za pomocą SQL ze sortowaniem w Javie. 
+ * Okno zawiera przyciski do włączenia sortowania, do wyjścia z programu oraz 
+ * posiada pola i obszary tekstowe dla każdego języka. Użytkownik ma możliwość
+ * wyboru algorytmu sortowania. Sortowania dla SQL i dla Javy odbywają się w 
+ * osobnych wątkach. 
+ * @author AleksanderSklorz
+ */
 public class DatabaseVersusJavaFXMLController implements Initializable {
-    private String algorithm;
+    private SortTypes algorithm;
     @FXML
     private Button exitButton, startButton;
     @FXML
@@ -30,17 +37,6 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
         if(algorithm != null){
             databaseTextArea.setText("Trwa sortowanie...");
             javaTextArea.setText("Trwa sortowanie...");
-            //try{
-            //    Thread.sleep(20);
-            //}catch(InterruptedException e){
-            //    Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
-            //}
-            //Platform.runLater(new SQLSorting(this));
-            //Platform.runLater(new JavaSorting(this, algorithm));
-            //Thread t = new Thread(new SQLSorting(this));
-            //t.setDaemon(true);
-            //t.start();
-            //Platform.runLater(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty()));
             new Thread(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty())).start();
             new Thread(new JavaSorting(javaTextArea.textProperty(), javaTimeTextField.textProperty(), algorithm)).start();
         }
@@ -52,18 +48,6 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
             System.exit(0);
         });
     }   
-    public TextArea getDatabaseTextArea(){
-        return databaseTextArea; 
-    }
-    public TextField getDatabaseTimeTextField(){
-        return databaseTimeTextField;
-    }
-    public TextArea getJavaTextArea(){
-        return javaTextArea;
-    }
-    public TextField getJavaTimeTextField(){
-        return javaTimeTextField;
-    }
     private void showAlgorithmChoiceDialog(){
         ArrayList<String> algorithms = new ArrayList();
         algorithms.add("Scalanie");
@@ -74,6 +58,11 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
         algorithmDialog.setTitle("Algorytmy");
         algorithmDialog.setHeaderText("Wybierz algorytm dla sortowania przez Javę");
         Optional<String> result = algorithmDialog.showAndWait();
-        result.ifPresent(choice -> algorithm = choice);
+        result.ifPresent(choice -> {
+            if(choice.equals("Scalanie")) algorithm = SortTypes.MERGE; 
+            else if(choice.equals("Bąbelkowe (z modyfikacją)")) algorithm = SortTypes.BUBBLE;
+            else if(choice.equals("Przez wybór")) algorithm = SortTypes.SELECTION;
+            algorithm = SortTypes.INSERTION;
+        });
     }
 }
