@@ -17,10 +17,10 @@ public class SQLSorting implements Runnable{
     //public SQLSorting(DatabaseVersusJavaFXMLController cotroller){
     //    this.controller = cotroller;
     //}
-    private StringProperty textAreaTextProperty, textFieldTextProperty;
-    public SQLSorting(StringProperty textAreaTextProperty, StringProperty textFieldTextProperty){
-        this.textAreaTextProperty = textAreaTextProperty;
-        this.textFieldTextProperty = textFieldTextProperty;
+    private StringProperty textAreaProperty, textFieldProperty;
+    public SQLSorting(StringProperty textAreaProperty, StringProperty textFieldProperty){
+        this.textAreaProperty = textAreaProperty;
+        this.textFieldProperty = textFieldProperty;
     }
     public void run(){
         try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/databaseversusjava", "olek", "haslo12345")){
@@ -32,10 +32,11 @@ public class SQLSorting implements Runnable{
             while(rs.next()){
                 sb.append(rs.getLong("id")).append(" ").append(rs.getLong("data")).append("\n");
             }
-            textAreaTextProperty.set(sb.toString());
-            textFieldTextProperty.set((double)(after - before)/1000 + " s");
+            textAreaProperty.set(sb.toString());
+            textFieldProperty.set((double)(after - before)/1000 + " s");
         }catch(SQLException e){
             Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 }
+
