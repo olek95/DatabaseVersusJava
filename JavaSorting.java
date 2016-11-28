@@ -9,13 +9,21 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.TextArea;
 
 public class JavaSorting implements Runnable{
-    private DatabaseVersusJavaFXMLController controller;
-    private String algorithm;
-    public JavaSorting(DatabaseVersusJavaFXMLController controller, String algorithm){
+    //private DatabaseVersusJavaFXMLController controller;
+    //private String algorithm;
+    /*public JavaSorting(DatabaseVersusJavaFXMLController controller, String algorithm){
         this.controller = controller;
+        this.algorithm = algorithm;
+    }*/
+    private StringProperty textAreaProperty, textFieldProperty; 
+    private String algorithm;
+    public JavaSorting(StringProperty textAreaProperty, StringProperty textFieldProperty, String algorithm){
+        this.textAreaProperty = textAreaProperty;
+        this.textFieldProperty = textFieldProperty;
         this.algorithm = algorithm;
     }
     public void run(){
@@ -26,14 +34,16 @@ public class JavaSorting implements Runnable{
             else if(algorithm.equals("Bąbelkowe (z modyfikacją)")) time = bubbleSort(data);
             else if(algorithm.equals("Przez wybór")) time = selectionSort(data);
             else if(algorithm.equals("Przez wstawianie")) time = insertionSort(data);
-            TextArea javaTextArea = controller.getJavaTextArea();
-            javaTextArea.setText("");
+            //TextArea javaTextArea = controller.getJavaTextArea();
+            //javaTextArea.setText("");
+            StringBuffer sb = new StringBuffer("");
             for(int i = 0; i < data.length; i++){
                 for(int k = 0; k < data[i].length; k++)
-                    javaTextArea.appendText(data[i][k] + " ");
-                javaTextArea.appendText("\n");
+                    sb.append(data[i][k]).append(" ");
+                sb.append("\n");
             }
-            controller.getJavaTimeTextField().setText((double)time/1000 + " s");
+            textAreaProperty.set(sb.toString());
+            textFieldProperty.set((double)time/1000 + " s");
         }catch(SQLException e){
             Logger.getLogger(JavaSorting.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -124,3 +134,4 @@ public class JavaSorting implements Runnable{
         return System.currentTimeMillis() - before;
     }
 }
+
