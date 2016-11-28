@@ -22,6 +22,8 @@ public class DatabaseVersusJava extends Application {
         
         Scene scene = new Scene(root);
         
+        stage.setTitle("Porównanie sortowań Java vs SQL");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
