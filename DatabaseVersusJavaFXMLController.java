@@ -25,11 +25,11 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
     private TextField databaseTimeTextField, javaTimeTextField;
     @FXML
     private void sortAction(ActionEvent event) {
-        //algorithm = null;
-        //showAlgorithmChoiceDialog();
-        //if(algorithm != null){
-            //databaseTextArea.setText("Trwa sortowanie...");
-            //javaTextArea.setText("Trwa sortowanie...");
+        algorithm = null;
+        showAlgorithmChoiceDialog();
+        if(algorithm != null){
+            databaseTextArea.setText("Trwa sortowanie...");
+            javaTextArea.setText("Trwa sortowanie...");
             //try{
             //    Thread.sleep(20);
             //}catch(InterruptedException e){
@@ -41,10 +41,9 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
             //t.setDaemon(true);
             //t.start();
             //Platform.runLater(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty()));
-            Thread t = new Thread(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty()));
-            t.start();
-            
-       // }
+            new Thread(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty())).start();
+            new Thread(new JavaSorting(javaTextArea.textProperty(), javaTimeTextField.textProperty(), algorithm)).start();
+        }
     }
     
     @Override
