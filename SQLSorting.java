@@ -7,36 +7,47 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.binding.StringExpression;
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.concurrent.Task;
 
-public class SQLSorting implements Runnable{
-    //private DatabaseVersusJavaFXMLController controller;
-    //public SQLSorting(DatabaseVersusJavaFXMLController cotroller){
-    //    this.controller = cotroller;
-    //}
+/**
+ * Obiekt klasy <code>SQLSorting</code> reprezentuje sortowanie wartości bezpośrednio 
+ * w bazie danych za pomocą SQL. Wynik jest zapisywany w obszarze tekstowym, a
+ * czas w polu tekstowym. 
+ * @author AleksanderSklorz
+ */
+public class SQLSorting extends Task{
     private StringProperty textAreaProperty, textFieldProperty;
-    public SQLSorting(StringProperty textAreaProperty, StringProperty textFieldProperty){
+    private int linesNumber;
+    private String result;
+    public SQLSorting(StringProperty textAreaProperty, StringProperty textFieldProperty, int linesNumber){
         this.textAreaProperty = textAreaProperty;
         this.textFieldProperty = textFieldProperty;
+        this.linesNumber = linesNumber;
     }
-    public void run(){
+    protected Void call(){
         try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/databaseversusjava", "olek", "haslo12345")){
             Statement stat = conn.createStatement();
             long before = System.currentTimeMillis();
             ResultSet rs = stat.executeQuery("SELECT * FROM Dane ORDER BY id, data DESC");
             long after = System.currentTimeMillis();
-            StringBuffer sb = new StringBuffer("");
-            while(rs.next()){
-                sb.append(rs.getLong("id")).append(" ").append(rs.getLong("data")).append("\n");
+            result = "";
+            int i = 0;
+            while(i < linesNumber && rs.next()){
+                System.out.println(i++);
+                result += rs.getLong("id") + " " + rs.getLong("data") + "\n";
             }
-            textAreaProperty.set(sb.toString());
-            textFieldProperty.set((double)(after - before)/1000 + " s");
+            Platform.runLater(() -> {
+                textAreaProperty.set(result);
+                textFieldProperty.set((double)(after - before)/1000 + " s");
+            });
+            
         }catch(SQLException e){
             Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
         }
+        return null;
     }
 }
+
 
