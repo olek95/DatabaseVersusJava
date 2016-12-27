@@ -9,44 +9,75 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
-import javafx.scene.control.TextArea;
+import javafx.concurrent.Task;
 
-public class JavaSorting implements Runnable{
-    //private DatabaseVersusJavaFXMLController controller;
-    //private String algorithm;
-    /*public JavaSorting(DatabaseVersusJavaFXMLController controller, String algorithm){
-        this.controller = controller;
-        this.algorithm = algorithm;
-    }*/
+/**
+ * Obiekt klasy <code>JavaSorting</code> reprezentuje sortowanie w Javie.
+ * Na początku pobrane są wszystkie wartości danych z bazy danych, a następnie 
+ * zaczyna się sortowanie algorytmem wybranym przez użytkownika. Dostępne 
+ * algorytmy to: scalanie, bąbelkowe (z modyfikacją polegającą m.in. na tym, że 
+ * w sytuacji w której jakaś iteracja nie zamieni kolejności wartości, sortowanie 
+ * zostanie przerwanie, gdyż oznacza to że już nic nie pozostało do posortowania), 
+ * sortowanie przez wybór i sortowanie przez wstawianie. Wynik jest zapisywany 
+ * w obszarze tekstowym, a czas w polu tekstowym. 
+ * @author AleksanderSklorz
+ */
+public class JavaSorting extends Task{
+    /**
+     * Typ wyliczeniowy <code>SortTypes</code> reprezentuje przykładowe możliwe algorytmy 
+     * sortowania dla Javy.
+     */
+    public enum SortTypes{
+        MERGE, 
+        BUBBLE, 
+        SELECTION,
+        INSERTION;
+    }
     private StringProperty textAreaProperty, textFieldProperty; 
-    private String algorithm;
-    public JavaSorting(StringProperty textAreaProperty, StringProperty textFieldProperty, String algorithm){
+    private SortTypes algorithm;
+    private int linesNumber;
+    private String result;
+    private long time;
+    public JavaSorting(StringProperty textAreaProperty, StringProperty textFieldProperty, SortTypes algorithm, int linesNumber){
         this.textAreaProperty = textAreaProperty;
         this.textFieldProperty = textFieldProperty;
         this.algorithm = algorithm;
+        this.linesNumber = linesNumber;
     }
-    public void run(){
+    protected Void call(){
         try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/databaseversusjava", "olek", "haslo12345")){
             long[][] data = getDataFromDatabase(conn);
-            long time=0;
-            if(algorithm.equals("Scalanie")) time = mergeSort(data);
-            else if(algorithm.equals("Bąbelkowe (z modyfikacją)")) time = bubbleSort(data);
-            else if(algorithm.equals("Przez wybór")) time = selectionSort(data);
-            else if(algorithm.equals("Przez wstawianie")) time = insertionSort(data);
-            //TextArea javaTextArea = controller.getJavaTextArea();
-            //javaTextArea.setText("");
-            StringBuffer sb = new StringBuffer("");
-            for(int i = 0; i < data.length; i++){
-                for(int k = 0; k < data[i].length; k++)
-                    sb.append(data[i][k]).append(" ");
-                sb.append("\n");
+            time = 0;
+            switch(algorithm){
+                case MERGE:
+                    time = mergeSort(data);
+                    break;
+                case BUBBLE:
+                    time = bubbleSort(data);
+                    break;
+                case SELECTION:
+                    time = selectionSort(data);
+                    break;
+                case INSERTION:
+                    time = insertionSort(data);
             }
-            textAreaProperty.set(sb.toString());
-            textFieldProperty.set((double)time/1000 + " s");
+            result = "";
+            for(int i = 0; i < data.length && i < linesNumber; i++){
+                System.out.println(i);
+                for(int k = 0; k < data[i].length; k++)
+                    result += data[i][k] + " ";
+                result += "\n";
+            }
+            Platform.runLater(() -> {
+                textAreaProperty.set(result);
+                textFieldProperty.set((double)time/1000 + " s");
+            });
         }catch(SQLException e){
             Logger.getLogger(JavaSorting.class.getName()).log(Level.SEVERE, null, e);
         }
+        return null;
     }
     private long[][] getDataFromDatabase(Connection conn) throws SQLException{
         Statement stat = conn.createStatement(); 
@@ -56,6 +87,7 @@ public class JavaSorting implements Runnable{
         rs.beforeFirst();
         int i = 0;
         while(rs.next()){
+            System.out.println(i);
             data[i][0] = rs.getLong(1);
             data[i][1] = rs.getLong(2);
             i++;
@@ -64,8 +96,9 @@ public class JavaSorting implements Runnable{
     }
     private long mergeSort(long[][] data){
         long before = System.currentTimeMillis();
-        Arrays.sort(data, new Comparator<long[]>(){ 
+        Arrays.sort(data, new Comparator<long[]>(){  // w dokumentacji podane jest że ta wersja metody sort wykorzystuje mergesort, więc korzystam z niej, zamiast implementować własną
             public int compare(long[] r1, long[] r2){
+                System.out.println(r1[0]);
                 int result = Long.compare(r1[0], r2[0]);
                 if(result == 0) return Long.compare(r1[1], r2[1]);
                 else return result;
@@ -82,7 +115,7 @@ public class JavaSorting implements Runnable{
                 if(data[k][0] > data[k+1][0]){
                     long x = data[k][0], y = data[k][1];
                     data[k][0] = data[k+1][0];
-                    data[k][0] = data[k+1][1];
+                    data[k][1] = data[k+1][1];
                     data[k+1][0] = x;
                     data[k+1][1] = y;
                     swap = true;
