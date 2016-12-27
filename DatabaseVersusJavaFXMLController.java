@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 
 /**
  * Klasa <code>DatabaseVersusJavaFXMLController</code> reprezentuje sterowanie 
@@ -24,6 +25,7 @@ import javafx.scene.control.TextField;
  */
 public class DatabaseVersusJavaFXMLController implements Initializable {
     private SortTypes algorithm;
+    private int linesNumber;
     @FXML
     private Button exitButton, startButton;
     @FXML
@@ -34,11 +36,12 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
     private void sortAction(ActionEvent event) {
         algorithm = null;
         showAlgorithmChoiceDialog();
+        showLinesNumberChoiceDialog();
         if(algorithm != null){
             databaseTextArea.setText("Trwa sortowanie...");
             javaTextArea.setText("Trwa sortowanie...");
-            new Thread(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty())).start();
-            new Thread(new JavaSorting(javaTextArea.textProperty(), javaTimeTextField.textProperty(), algorithm)).start();
+            new Thread(new SQLSorting(databaseTextArea.textProperty(), databaseTimeTextField.textProperty(), linesNumber)).start();
+            new Thread(new JavaSorting(javaTextArea.textProperty(), javaTimeTextField.textProperty(), algorithm, linesNumber)).start();
         }
     }
     
@@ -49,6 +52,7 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
         });
     }   
     private void showAlgorithmChoiceDialog(){
+        boolean selected = false;
         ArrayList<String> algorithms = new ArrayList();
         algorithms.add("Scalanie");
         algorithms.add("Bąbelkowe (z modyfikacją)");
@@ -57,12 +61,34 @@ public class DatabaseVersusJavaFXMLController implements Initializable {
         ChoiceDialog<String> algorithmDialog = new ChoiceDialog("Scalanie", algorithms);
         algorithmDialog.setTitle("Algorytmy");
         algorithmDialog.setHeaderText("Wybierz algorytm dla sortowania przez Javę");
-        Optional<String> result = algorithmDialog.showAndWait();
-        result.ifPresent(choice -> {
-            if(choice.equals("Scalanie")) algorithm = SortTypes.MERGE; 
-            else if(choice.equals("Bąbelkowe (z modyfikacją)")) algorithm = SortTypes.BUBBLE;
-            else if(choice.equals("Przez wybór")) algorithm = SortTypes.SELECTION;
-            algorithm = SortTypes.INSERTION;
-        });
+        do{
+            Optional<String> result = algorithmDialog.showAndWait();
+            if(result.isPresent()){
+                String choice = result.get();
+                selected = true;
+                if(choice.equals("Scalanie")) algorithm = SortTypes.MERGE; 
+                else if(choice.equals("Bąbelkowe (z modyfikacją)")) algorithm = SortTypes.BUBBLE;
+                else if(choice.equals("Przez wybór")) algorithm = SortTypes.SELECTION;
+                else algorithm = SortTypes.INSERTION;
+            }
+        }while(!selected);
+    }
+    private void showLinesNumberChoiceDialog(){
+        boolean ok = false;
+        TextInputDialog linesNumberDialog = new TextInputDialog();
+        linesNumberDialog.setTitle("Wybór ilości wierszy");
+        linesNumberDialog.setContentText("Podaj ilość wierszy które chcesz wyświetlić z posortowanego zbioru (u mnie max 999999).\n"
+                + "UWAGA: Podanie maksymalnej wartości może znacznie przedłużyć czas wyświetlania wyniku, nawet o kilka godzin.\n"
+                + "Jeśli ważny jest sam czas, można ustawić na 0. Podany czas sortowania to czas bez wliczania wyświetlania.");
+        do{
+            Optional<String> result = linesNumberDialog.showAndWait();
+            if(result.isPresent()){
+                String number = result.get();
+                if(number.matches("[0-9]+")){
+                    ok = true;
+                    linesNumber = Integer.parseInt(result.get());
+                }
+            }
+        }while(!ok);
     }
 }
