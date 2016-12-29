@@ -47,7 +47,7 @@ public class JavaSorting extends Task{
         this.linesNumber = linesNumber;
     }
     protected Void call(){
-        try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/databaseversusjava", "olek", "haslo12345")){
+        try(Connection conn = DriverManager.getConnection(DatabaseVersusJava.getURL(), DatabaseVersusJava.getLogin(), DatabaseVersusJava.getPassword())){
             long[][] data = getDataFromDatabase(conn);
             time = 0;
             switch(algorithm){
@@ -64,16 +64,19 @@ public class JavaSorting extends Task{
                     time = insertionSort(data);
             }
             result = "";
+            System.out.println("PO SORTOWANIU");
             for(int i = 0; i < data.length && i < linesNumber; i++){
-                System.out.println(i);
+                System.out.println("D: " + i);
                 for(int k = 0; k < data[i].length; k++)
                     result += data[i][k] + " ";
                 result += "\n";
             }
+            System.out.println("Po przygotowaniu");
             Platform.runLater(() -> {
                 textAreaProperty.set(result);
                 textFieldProperty.set((double)time/1000 + " s");
             });
+            System.out.println("Po zapisaniu");
         }catch(SQLException e){
             Logger.getLogger(JavaSorting.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -87,7 +90,7 @@ public class JavaSorting extends Task{
         rs.beforeFirst();
         int i = 0;
         while(rs.next()){
-            System.out.println(i);
+            System.out.println("C: " + i);
             data[i][0] = rs.getLong(1);
             data[i][1] = rs.getLong(2);
             i++;
@@ -98,7 +101,7 @@ public class JavaSorting extends Task{
         long before = System.currentTimeMillis();
         Arrays.sort(data, new Comparator<long[]>(){  // w dokumentacji podane jest że ta wersja metody sort wykorzystuje mergesort, więc korzystam z niej, zamiast implementować własną
             public int compare(long[] r1, long[] r2){
-                System.out.println(r1[0]);
+                System.out.println("S: " + r1[0]);
                 int result = Long.compare(r1[0], r2[0]);
                 if(result == 0) return Long.compare(r1[1], r2[1]);
                 else return result;
