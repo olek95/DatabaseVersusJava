@@ -27,7 +27,7 @@ public class SQLSorting extends Task{
         this.linesNumber = linesNumber;
     }
     protected Void call(){
-        try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/databaseversusjava", "olek", "haslo12345")){
+        try(Connection conn = DriverManager.getConnection(DatabaseVersusJava.getURL(), DatabaseVersusJava.getLogin(), DatabaseVersusJava.getPassword())){
             Statement stat = conn.createStatement();
             long before = System.currentTimeMillis();
             ResultSet rs = stat.executeQuery("SELECT * FROM Dane ORDER BY id, data DESC");
@@ -35,13 +35,15 @@ public class SQLSorting extends Task{
             result = "";
             int i = 0;
             while(i < linesNumber && rs.next()){
-                System.out.println(i++);
+                System.out.println("DB: " + i++);
                 result += rs.getLong("id") + " " + rs.getLong("data") + "\n";
             }
+            System.out.println("DB po przygotowaniu");
             Platform.runLater(() -> {
                 textAreaProperty.set(result);
                 textFieldProperty.set((double)(after - before)/1000 + " s");
             });
+            System.out.println("DB po zapisaniu");
             
         }catch(SQLException e){
             Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
@@ -49,5 +51,4 @@ public class SQLSorting extends Task{
         return null;
     }
 }
-
 
