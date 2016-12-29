@@ -7,11 +7,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,9 +17,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javax.swing.JOptionPane;
 
 public class DatabaseVersusJava extends Application {
-    
+    private static String login, password, url;
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("DatabaseVersusJavaFXML.fxml"));
@@ -35,10 +33,11 @@ public class DatabaseVersusJava extends Application {
         stage.show();
     }
     public static void main(String[] args) {
+        showLoginInformationDialog();
         fillTable();
         launch(args);
     }
-    private static void fillTable(){
+    private static void fillTable(){ 
         Random rand = new Random();
         if(!(new File("Skrypt.sql").exists())){
             for(int i = 0; i < 1000000; i++){
@@ -52,29 +51,42 @@ public class DatabaseVersusJava extends Application {
                 }
             }
         }
-        try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/databaseversusjava", "olek", "haslo12345")){
+        try(Connection conn = DriverManager.getConnection(url, login, password)){
             if(!conn.getMetaData().getTables(null, null, "Dane", null).next()){
                 Statement stat = conn.createStatement();
                 stat.executeUpdate("CREATE TABLE Dane(id BIGINT, data BIGINT)");
-                //PreparedStatement prepStat = conn.prepareStatement("INSERT INTO Dane VALUES(?, ?)");
-                //Random rand = new Random();
-                //int size = rand.nextInt(4000001) + 1000000;
-                //for(int i = 0; i < 1000000; i++){
-                    /*prepStat.setLong(1, rand.nextLong());
-                    prepStat.setLong(2, rand.nextLong());
-                    prepStat.executeUpdate();*/
-                    //System.out.println(i);
-                //}
-                //int i = 0;
-                //List<String> lines = Files.readAllLines(Paths.get("Skrypt.sql"));
-                //for(String line : lines){
-                //    System.out.println(i++);
-                //    stat.executeUpdate(line);
-                //}
-                //stat.executeUpdate(new String(Files.readAllBytes(Paths.get("Skrypt.sql"))));
             }
         }catch(SQLException e){
             Logger.getLogger(DatabaseVersusJava.class.getName()).log(Level.SEVERE, null, e);
         }
+    }
+    private static void showLoginInformationDialog(){
+        login = JOptionPane.showInputDialog("Podaj login: ");
+        if(login == null) System.exit(0);
+        password = JOptionPane.showInputDialog("Podaj hasło: ");
+        if(password == null) System.exit(0);
+        url = JOptionPane.showInputDialog("Podaj URL (np. jdbc:mysql://localhost:3306/databaseversusjava): ");
+        if(url == null) System.exit(0);
+    }
+    /**
+     * Zwraca nazwę użytkownika. 
+     * @return nazwa użytkownika
+     */
+    public static String getLogin(){
+        return login;
+    }
+    /**
+     * Zwraca hasło użytkownika.
+     * @return hasło użytkownika.
+     */
+    public static String getPassword(){
+        return password;
+    }
+    /**
+     * Zwraca adres URL.
+     * @return adres URL
+     */
+    public static String getURL(){
+        return url;
     }
 }
