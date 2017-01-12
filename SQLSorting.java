@@ -35,15 +35,12 @@ public class SQLSorting extends Task{
             result = "";
             int i = 0;
             while(i < linesNumber && rs.next()){
-                System.out.println("DB: " + i++);
                 result += rs.getLong("id") + " " + rs.getLong("data") + "\n";
             }
-            System.out.println("DB po przygotowaniu");
             Platform.runLater(() -> {
                 textAreaProperty.set(result);
                 textFieldProperty.set((double)(after - before)/1000 + " s");
             });
-            System.out.println("DB po zapisaniu");
             
         }catch(SQLException e){
             Logger.getLogger(DatabaseVersusJavaFXMLController.class.getName()).log(Level.SEVERE, null, e);
