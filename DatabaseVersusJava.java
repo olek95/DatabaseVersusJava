@@ -41,7 +41,6 @@ public class DatabaseVersusJava extends Application {
         Random rand = new Random();
         if(!(new File("Skrypt.sql").exists())){
             for(int i = 0; i < 1000000; i++){
-                System.out.println(i);
                 StringBuilder sb = new StringBuilder("INSERT INTO Dane VALUES("); 
                 sb.append(rand.nextLong()).append(", ").append(rand.nextLong()).append(");\r\n");
                 try{
